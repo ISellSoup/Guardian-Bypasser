@@ -5,7 +5,7 @@
     <link rel="shortcut icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        html, body {
+        :root, body {
             font-family: sans-serif;
             margin: 0;
             --border-width: 2.5px;
@@ -127,14 +127,18 @@
 <script>
 function openPopup() {
     try {
+    
     let w = open("")
-    w.document.body.innerHTML += document.getElementById("Content").innerHTML
-    w.document.head.innerHTML += document.head.innerHTML
-    const definitions = w.document.createElement("script")
-    definitions.textContent = document.getElementById("definitions").innerHTML
-    w.document.head.appendChild(definitions)
-    w.focus()
-    close()
+    w.applicationDocsrc = document.documentElement.outerHTML;
+    w.document.body.innerHTML += document.getElementById("Content").innerHTML;
+    w.document.head.innerHTML += document.head.innerHTML;
+    const definitions = w.document.createElement("script");
+    definitions.textContent = document.getElementById("definitions").innerHTML;
+    w.document.head.appendChild(definitions);
+    w.focus();
+    close();
+    location.href="about:blank";
+
     } catch (e) {}
 }
 
@@ -147,7 +151,12 @@ const messages = [
     "Easter eggs are just your imagination",
     "I don't have any games on my phone",
     "You're harming the learning environment",
-    "If there's too little messages here, that's too bad"
+    "If there's too little messages here, that's too bad",
+    "\"Can't wait for the new messages in the next update!!\"<br>- literally everyone",
+    "Look behind you.",
+    "Now with puppies!!!",
+    "Do NOT follow the instructions below...",
+    "For educational purposes only :)"
 ]
 const message =  messages[Math.floor(Math.random() * messages.length)]
 
@@ -165,19 +174,16 @@ function init() {
 
 </script>
 <script id="definitions" type="text/javascript">
-if (window.opener) {
-
-const liveUrl = "https://standofevil15555.sevalla.page/";
+let modeFile;
+let modeHTTP;
 let frame;
-let staticFrame;
 let contentFallback;
 let refresh;
 let input;
-let isStaticContent = false;
+let isFileContent = false;
 let bustCache = false;
 let originalURL = "";
 let cacheBustedURL = "";
-let staticSrc = "";
 let unloadCallback = false;
 
 if (document.readyState === "loading") {
@@ -187,16 +193,16 @@ if (document.readyState === "loading") {
 }
 
 function init() {
-    window.opener.close()
+    modeFile = document.getElementById("modeFile");
+    modeHTTP = document.getElementById("modeHTTP");
     frame = document.getElementById("frame");
-    staticFrame = document.getElementById("staticFrame");
     contentFallback = document.getElementById("contentFallback")
     refresh = document.getElementById("refresh");
     input = document.getElementById("input");
 
-    frame.src = liveUrl;
+    frame.src = "about:blank";
     // Ensure the newest version of the site is shown
-    RefreshContent();
+    //RefreshContent();
 
     frame.contentWindow.addEventListener("unload", function(){
         if (unloadCallback) {
@@ -204,13 +210,6 @@ function init() {
             showStopLoad()
         } else {
             unloadCallback = true;
-        }
-    });
-    staticFrame.contentWindow.addEventListener("unload", function(){
-        if (unloadCallback) {
-            showDynamicContent()
-            frame.src = staticFrame.src
-            console.log("unload static");
         }
     });
 }
@@ -225,25 +224,26 @@ function showStopLoad() {
     stopLoad.hidden = false;
 }
 
-function showDynamicContent() {
-    staticFrame.hidden = true;
+function showHTTPContent() {
+    modeFile.hidden = false;
+    modeHTTP.hidden = true;
     frame.hidden = false;
     contentFallback.hidden = true;
-    isStaticContent = false;
+    isFileContent = false;
 }
 
-function showStaticContent() {
-    staticFrame.hidden = false;
-    frame.hidden = true;
+function showFileContent() {
+    modeFile.hidden = false;
+    modeHTTP.hidden = true;
+    input.hidden = true;
+    frame.hidden = false;
     contentFallback.hidden = true;
-    isStaticContent = true;
+    isFileContent = true;
 }
 
 function showFallbackContent() {
-    staticFrame.hidden = true;
     frame.hidden = true;
     contentFallback.hidden = false;
-    isStaticContent = true;
 }
 
 function isValidUrl(url) {
@@ -256,7 +256,7 @@ function isValidUrl(url) {
 }
 
 function LoadContent() {
-    showDynamicContent()
+    showHTTPContent()
     // remove previous listener on the iframe element if present
     if (typeof loadEventListener !== "undefined" && loadEventListener) {
         frame.removeEventListener("load", ContentLoaded);
@@ -289,21 +289,7 @@ function StopLoadContent() {
         console.warn('frame.contentWindow.stop() threw:', e);
     }
 
-    // Fallback for same-origin: capture current DOM into the staticFrame using srcdoc
-    try {
-        // Accessing document will throw for cross-origin
-        staticSrc = frame.src;
-        const docHtml = frame.contentWindow.document.documentElement.outerHTML;
-        staticFrame.srcdoc = docHtml;
-        showStaticContent();
-        frame.src = 'about:blank';
-        showRefresh();
-        return;
-    } catch (e) {
-        console.warn('Same-origin snapshot failed (probably cross-origin):', e);
-    }
-
-    // Last-resort visual fallback: show a frozen overlay
+    // Fallback: show a frozen overlay
     try {
         frame.src = 'about:blank';
         showFallbackContent()
@@ -317,12 +303,16 @@ function RefreshContent() {
     console.log("refresh")
     bustCache = true;
 
-    if (isStaticContent) {
-        frame.src = staticSrc
-    } else if (frame.src !== cacheBustedURL) {
-        input.value = frame.src;
+    if (isFileContent) {
+        frame.srcdoc = frame.srcdoc;
+        showStopLoad();
+    } else {
+        if (frame.src !== cacheBustedURL) {
+            input.value = frame.src;
+        }
+        LoadContent()
     }
-    LoadContent()
+    
 }
 
 function ContentLoaded() {
@@ -334,7 +324,7 @@ function ContentLoaded() {
         refresh.style.rotate = `${rotation + 360}deg`;
     });
     
-    if ((!isStaticContent) && (frame.src !== cacheBustedURL)) {
+    if ((!isFileContent) && (frame.src !== cacheBustedURL)) {
         input.value = frame.src;
     }
 
@@ -350,16 +340,73 @@ function UrlInputKeyDown(Key) {
             input.value = "http://"+input.value;
         }
         if (input.value.indexOf(".") == 0 || input.value.length==0) {
-            input.value = liveUrl;
+            input.value = "about:blank";
         }
         LoadContent();
     }
 }
 
+function SwitchHTTP() {
+    frame.srcdoc = "";
+
+    frame.remove();
+    const newFrame = document.createElement("iframe");
+    newFrame.id = "frame";
+    document.getElementById("main").appendChild(newFrame);
+    frame = newFrame;
+
+    transitionHTTPContent();
+    RefreshContent();
+}
+
+function PromptOpenFile() {
+    document.getElementById("fileInput").click()
+}
+
+function FileSelected(e) {
+    showFileContent()
+    const elem = e.target
+    if (elem.files.length===1) {
+        OpenFile(elem.files[0])
+    }
+}
+
+function OpenFile(file) {
+    const reader = new FileReader();
+
+    reader.onload = ()=>{
+        frame.srcdoc = reader.result
+        showStopLoad()
+    }
+
+    reader.readAsText(file);
+}
+
+function openPopupNested() {
+    try {
+    
+    let w = open("")
+
+    w.applicationDocsrc = window.applicationDocsrc;
+    const doc = new DOMParser().parseFromString(applicationDocsrc,"text/html")
+
+    console.log(doc.innerHTML)
+
+    w.document.body.innerHTML += doc.getElementById("Content").innerHTML
+    w.document.head.innerHTML += doc.head.innerHTML
+    const definitions = w.document.createElement("script")
+    definitions.textContent = doc.getElementById("definitions").innerHTML
+    w.document.head.appendChild(definitions)
+    w.focus()
+
+    } catch (e) {
+        throw e;
+    }
 }
 </script>
 <body>
     <div id="Content" hidden="true">
+        <input type="file" id="fileInput" style="display: none;" onchange="FileSelected(event)">
         <div class="Navbar">
             <button class="flat-button" id="refresh" onclick="RefreshContent()">&#x21bb;</button>
             <button class="flat-button" id="stopLoad" onclick="StopLoadContent()" hidden="true">x</button>
@@ -378,6 +425,15 @@ function UrlInputKeyDown(Key) {
                 <div>tab 2</div>
                 <div>tab 2</div>
             </div>-->
+            <button id="modeHTTP" hidden="true" class="flat-button" onclick="SwitchHTTP()">
+                http
+            </button>
+            <button id="modeFile" class="flat-button" onclick="PromptOpenFile()">
+                file
+            </button>
+            <button id="new" class="flat-button" onclick="openPopupNested()">
+                +
+            </button>
             <button class="flat-button" id="Settings" popovertarget="settingsPanel" hidden="true">
                 <!-- Created with Inkscape (http://www.inkscape.org/) -->
                 <svg
@@ -403,29 +459,42 @@ function UrlInputKeyDown(Key) {
                 </svg>
             </button>
         </div>
-        <iframe src="" id="frame"></iframe>
-        <iframe id="staticFrame" hidden="true"></iframe>
-        <div id="contentFallback" hidden="true">
-            <h1>
-                Access denied to embedded page content
-                <br>
-                :(
-            </h1>
+        <div id="main" style="all: unset;">
+            <iframe src="" id="frame"></iframe>
+            <div id="contentFallback" hidden="true">
+                <h1>
+                    Page cannot be displayed
+                    <br>
+                    :(
+                </h1>
+            </div>
         </div>
         <div id="settingsPanel" popover="auto">
             <h2>Settings</h2>
         </div>
+        <div id="backup" hidden="true">
+
+        </div>
     </div>
     <h1 id="message" style="color: red;" onload="document.getElementById('info').hidden=false; document.getElementById('message').innerHTML+=message;">
-        <script>
-            
-        </script>
         <noscript>You don't have javascript enabled lol</noscript>
     </h1>
     <h1 id="info" hidden="true">
         Click anywhere to continue
         <br>
-        u4
+        u5
+        <br>
+        <p style="color:hsl(0,0,80)">
+            <script>
+                setInterval(()=>{
+                    const countdown = document.getElementById("countdown")
+                    const progress = parseInt(countdown.innerText)-1;
+                    countdown.innerText = progress
+                    if (progress===0) location.href="about:blank";
+                },1000)
+            </script>
+            Self destructing in: <span id="countdown">5</span>
+        </p>
     </h1>
 </body>
 </html>
