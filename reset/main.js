@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-<script>
 localStorage.removeItem("DailyAccessLog")
 localStorage.removeItem("WeeklyAccessLog")
-
 location.href = "/"
-</script>
