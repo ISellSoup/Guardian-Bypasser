@@ -152,7 +152,7 @@ function openPopup(instant=false) {
     }
 
     if (dayLog.count>=2) throw "quota reached";
-    if (dayLog.count>=4) throw "quota reached";
+    if (weekLog.count>=4) throw "quota reached";
 
     w = open("")
     w.applicationDocsrc = document.documentElement.outerHTML;
