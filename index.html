@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>
+        const selfDestructTimeoutSeconds = 5;
+        const quotaSystemEnabled = true;
+        const enforceDailyQuota = true;
+        const enforceWeeklyQuota = true;
+        const dailyQuota = 2;
+        const weeklyQuota = 5;
+    </script>
     <title>Google Docs</title>
     <link rel="shortcut icon" href="https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +23,7 @@
         h1 {
             text-align: center;
         }
-        #frame, #staticFrame, #contentFallback {
+        #frame, #contentFallback {
             border: none;
             margin: 0;
             padding: 0;
@@ -103,24 +111,6 @@
             border-bottom: solid white var(--border-width);
             padding-top: 5px;
             width: 100%;
-        }
-        #tabs {
-            --scrollbar-size: 4px;
-            height: 100%;
-            color: white;
-            display: flex;
-            white-space: nowrap;
-            overflow: auto;
-            gap: 10px;
-        }
-        #tabs::-webkit-scrollbar {
-            background-color: transparent;
-            height: var(--scrollbar-size);
-        }
-        #tabs::-webkit-scrollbar-thumb {
-            background: white;
-            padding: 0.5px;
-            border-radius: var(--scrollbar-size);
         }
     </style>
 </head>
@@ -458,29 +448,9 @@ function openPopupNested() {
             <button class="flat-button" id="refresh" onclick="RefreshContent()">&#x21bb;</button>
             <button class="flat-button" id="stopLoad" onclick="StopLoadContent()" hidden="true">x</button>
             <Input type="url" id="input" onkeydown="UrlInputKeyDown(event)" value="">
-            <!--<div id="tabs">
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div>
-                <div>tab 2</div>
-                <div>tab 2</div>
-                <div>tab 2</div>
-            </div>-->
-            <button id="modeHTTP" hidden="true" class="flat-button" onclick="SwitchHTTP()">
-                http
-            </button>
-            <button id="modeFile" class="flat-button" onclick="PromptOpenFile()">
-                file
-            </button>
-            <button id="new" class="flat-button" onclick="openPopupNested()">
-                +
-            </button>
+            <button id="modeHTTP" hidden="true" class="flat-button" onclick="SwitchHTTP()">http</button>
+            <button id="modeFile" class="flat-button" onclick="PromptOpenFile()">file</button>
+            <button id="new" class="flat-button" onclick="openPopupNested()">+</button>
             <button class="flat-button" id="Settings" popovertarget="settingsPanel" hidden="true">
                 <!-- Created with Inkscape (http://www.inkscape.org/) -->
                 <svg
@@ -533,12 +503,20 @@ function openPopupNested() {
         <br>
         <p style="color:hsl(0,0,80)">
             <script>
+                const countdown = document.getElementById("countdown");
+                let progress = 0;
+                
+                function updateCountdown() {
+                    const current = (selfDestructTimeoutSeconds*1000)-progress;
+                    countdown.innerText = (current/1000).tostring();
+                    if (current<=0) location.href="about:blank";
+                }
+                updateCountdown()
+                
                 setInterval(()=>{
-                    const countdown = document.getElementById("countdown")
-                    const progress = parseInt(countdown.innerText)-1;
-                    countdown.innerText = progress
-                    if (progress===0) location.href="about:blank";
-                },1000)
+                    progress++;
+                    updateCountdown();
+                },1)
             </script>
             Self destructing in: <span id="countdown">5</span>
         </p>
