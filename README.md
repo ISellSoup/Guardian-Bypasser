@@ -6,5 +6,4 @@ Includes a quota system and auto-self destruct function to stay low profile.
 Includes file opening capabilities.
 Features a new tab button to minimize time spent outside about:blank.
 Includes randomly selected messages on the start screen :).
-
-The files include a basic quota reset script if wanted.
+Includes exposed settings at the top of the html doc.

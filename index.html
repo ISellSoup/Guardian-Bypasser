@@ -2,8 +2,9 @@
 <html>
 <head>
     <script>
-        const selfDestructTimeoutSeconds = 5;
-        const quotaSystemEnabled = true;
+        const selfDestructTimeoutSeconds = 5; // Don't go past the tenth place
+        const quotaSystemEnabled = true; // Completely disables the quota system
+        // Setting enforce to false will still make the quota appear in the popup
         const enforceDailyQuota = true;
         const enforceWeeklyQuota = true;
         const dailyQuota = 2;
@@ -120,31 +121,32 @@ function openPopup(instant=false) {
     let quotaReached = false;
     let w;
 
-    const dayLog = JSON.parse(localStorage.getItem("DailyAccessLog") || '{"now":"","count":0}')
-    const weekLog = JSON.parse(localStorage.getItem("WeeklyAccessLog") || '{"now":"","count":0}') 
+    const dayLog = JSON.parse(localStorage.getItem("DailyAccessLog") || '{"now":"","count":0}');
+    const weekLog = JSON.parse(localStorage.getItem("WeeklyAccessLog") || '{"now":"","count":0}');
 
     try {
-   
-    const currentDate = new Date();
-    const monthStartDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay()
+    if (quotaSystemEnabled) {
+        const currentDate = new Date();
+        const monthStartDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
 
-    const day = `${currentDate.getFullYear()},${currentDate.getMonth()},${currentDate.getDate()}`
-    const week = `${currentDate.getFullYear()},${currentDate.getMonth()},${Math.ceil((currentDate.getDate()+monthStartDay) / 7)}`
+        const day = `${currentDate.getFullYear()},${currentDate.getMonth()},${currentDate.getDate()}`;
+        const week = `${currentDate.getFullYear()},${currentDate.getMonth()},${Math.ceil((currentDate.getDate()+monthStartDay) / 7)}`;
 
-    if (dayLog.now!=day) {
-        dayLog.count = 0
-        dayLog.now = day
-    }
+        if (dayLog.now!=day) {
+            dayLog.count = 0;
+            dayLog.now = day;
+        };
 
-    if (weekLog.now!=week) {
-        weekLog.count = 0
-        weekLog.now = week
-    }
+        if (weekLog.now!=week) {
+            weekLog.count = 0;
+            weekLog.now = week;
+        };
 
-    if (dayLog.count>=2) throw "quota reached";
-    if (weekLog.count>=4) throw "quota reached";
+        if (dayLog.count>=dailyQuota && enforceDailyQuota) throw "quota reached";
+        if (weekLog.count>=weeklyQuota && enforceWeeklyQuota) throw "quota reached";
+    };
 
-    w = open("")
+    w = open("");
     w.applicationDocsrc = document.documentElement.outerHTML;
     w.document.body.innerHTML += document.getElementById("Content").innerHTML;
     w.document.head.innerHTML += document.head.innerHTML;
@@ -152,24 +154,28 @@ function openPopup(instant=false) {
     definitions.textContent = document.getElementById("definitions").innerHTML;
     w.document.head.appendChild(definitions);
 
-    dayLog.count++
-    weekLog.count++
+    dayLog.count++;
+    weekLog.count++;
 
     } catch (e) {
         if (e=="quota reached") quotaReached = true;
-        console.error(e)
-        failed = true
-    }
+        failed = true;
+    };
 
-    localStorage.setItem("DailyAccessLog",JSON.stringify(dayLog))
-    localStorage.setItem("WeeklyAccessLog",JSON.stringify(weekLog))
+    if (quotaSystemEnabled) {
+        localStorage.setItem("DailyAccessLog",JSON.stringify(dayLog));
+        localStorage.setItem("WeeklyAccessLog",JSON.stringify(weekLog));
+    } else {
+        localStorage.removeItem("DailyAccessLog");
+        localStorage.removeItem("WeeklyAccessLog");
+    };
 
     if (instant && (failed && !quotaReached)) return;
     close();
-    document.body.innerHTML = ""
+    document.body.innerHTML = "";
     location.href="about:blank";
 
-    (w||window).alert(`Access quotas:\nDaily: ${dayLog.count}/2\nWeekly: ${weekLog.count}/4`)
+    if (quotaSystemEnabled) (w||window).alert(`Access quotas:\nDaily${enforceDailyQuota && ":" || " (suggested):"} ${dayLog.count}/${dailyQuota}\nWeekly${enforceWeeklyQuota && ":" || " (suggested):"} ${weekLog.count}/${weeklyQuota}`);
 
     if (w) w.focus();
 }
@@ -179,7 +185,7 @@ document.addEventListener("click",()=>{openPopup()},{once:true});
 const messages = [
     "Are you supposed to be on this?",
     "Spontaneous migration in 3... 2... 1...",
-    "You're doing evil things again aren't you",
+    "\"I'm not crazy, you are!\"<br>- Someone",
     "Any easter eggs were just your imagination",
     "I don't have any games on my phone... Sorry",
     "You're harming the carefully crafted learning environment",
@@ -499,27 +505,27 @@ function openPopupNested() {
     <h1 id="info" hidden="true">
         Click anywhere to continue
         <br>
-        u6
+        u7
         <br>
         <p style="color:hsl(0,0,80)">
-            <script>
-                const countdown = document.getElementById("countdown");
-                let progress = 0;
-                
-                function updateCountdown() {
-                    const current = (selfDestructTimeoutSeconds*1000)-progress;
-                    countdown.innerText = (current/1000).tostring();
-                    if (current<=0) location.href="about:blank";
-                }
-                updateCountdown()
-                
-                setInterval(()=>{
-                    progress++;
-                    updateCountdown();
-                },1)
-            </script>
-            Self destructing in: <span id="countdown">5</span>
+            Self destructing in: <span id="countdown">0</span>
         </p>
     </h1>
+    <script>
+        const countdown = document.getElementById("countdown");
+        let progress = 0;
+        
+        function updateCountdown() {
+            const current = (selfDestructTimeoutSeconds*10)-progress;
+            countdown.innerText = (current/10).toString();
+            if (current<=0) location.href="about:blank";
+        }
+        updateCountdown()
+        
+        setInterval(()=>{
+            progress++;
+            updateCountdown();
+        },100)
+    </script>
 </body>
 </html>
